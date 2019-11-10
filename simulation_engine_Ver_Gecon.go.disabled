@@ -1,0 +1,44 @@
+package local_simulator
+
+import "fmt"
+
+type IulType []string
+
+type PulType []string
+
+// A transition information
+type Transition struct {
+	name    string  // name of the transition
+	time    int     // firing time
+	counter int     //current value of the associated LEF
+	iul     IulType //set of tran. to be inmediately updated with corresponding UF
+	pul     PulType // set of transitions to be updated NEXT with corresponding UF
+}
+
+// List of enabled transitions
+type EventList struct {
+}
+
+// Future UPdating Node
+type FutureUpdatingNode struct {
+	transition  *Transition // Pointer to transition to be updated
+	uf          int         // Updating Factor delivered by each fired transition
+	effect_time int         // Time at which updating must take effect
+}
+
+//  Set of Future Updating Nodes ordered by time (aussi Future Event List)
+type FutureUpdatingList struct {
+}
+
+// Global constants
+const ()
+
+// Global variables
+var (
+	head_ful *FutureUpdatingList // Pointer to FUL
+	clock    int                 //Current simulation time
+)
+
+func S() {
+	fmt.Println("SIMBOT")
+}
