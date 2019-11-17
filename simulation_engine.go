@@ -15,6 +15,9 @@ package centralsim
 import (
 	"fmt"
 	"time"
+	"net"
+	"encoding/gob"
+
 )
 
 // TypeClock defines integer size for holding time.
@@ -31,6 +34,8 @@ type SimulationEngine struct {
 	il_mislefs    Lefs                  // Estructura de datos del simulador
 	ii_relojlocal TypeClock             // Valor de mi reloj local
 	iv_results    []ResultadoTransition // slice dinamico con los resultados
+	se_addr 			string 								// Direccion de escucha de mensajes
+	se_port 			string 								// Puerto de escucha de mensajes
 }
 
 /*
@@ -66,6 +71,7 @@ COMENTARIOS:
 func (self *SimulationEngine) fireEnabledTransitions(aiLocalClock TypeClock) {
 	for self.il_mislefs.hay_sensibilizadas() { //while
 		liCodTrans := self.il_mislefs.get_sensibilizada()
+		// fmt.Println("obtuve sensibilizada:", liCodTrans)
 		self.il_mislefs.disparar(liCodTrans)
 
 		// Anotar el Resultado que disparo la liCodTrans en tiempoaiLocalClock
@@ -97,6 +103,7 @@ func (self *SimulationEngine) tratar_eventos(ai_tiempo TypeClock) {
 		// a otra subred y el codigo global de la transicion es pasarlo
 		// a positivo y restarle 1
 		// ej: -3 -> transicion -(-3) -1 = 2
+		// fmt.Println("le_evento.Ii_transicion:", le_evento.Ii_transicion)
 		if le_evento.Ii_transicion >= 0 {
 			// Establecer nuevo valor de la funcion
 			self.il_mislefs.updateFuncValue(le_evento.Ii_transicion,
@@ -106,10 +113,32 @@ func (self *SimulationEngine) tratar_eventos(ai_tiempo TypeClock) {
 				le_evento.Ii_tiempo)
 		} else {
 			fmt.Println("Entre en un evento con transicion remota")
+			// Transformar a indice global y enviar mensajea subred remota
+			le_evento.Ii_transicion = (-1) * le_evento.Ii_transicion 
+			// Buscar direccion de la subred dado indice de transicion global
+			addr := self.il_mislefs.Il_pos[le_evento.Ii_transicion]
+			var msg MsgI
+			msg = MsgEvent{le_evento}
+			self.send_message(msg, addr)
 		}
 	}
 }
 
+
+//Enviar mensaje a traves de la red de forma codificada
+func (self *SimulationEngine) send_message(msg MsgI, addr string) {
+		conn, err := net.Dial("tcp", addr)
+		if err != nil {
+			fmt.Println("Dial error, retrying..:", err.Error())
+		} else {
+			// Encode and send data
+			encoder := gob.NewEncoder(conn)
+			err = encoder.Encode(&msg)
+			fmt.Println("Mensaje: ", msg," enviado a: ", addr)
+			// Close connection
+			conn.Close()
+		}
+}
 /*
 -----------------------------------------------------------------
    METODO: esperar_agentes
@@ -123,7 +152,9 @@ COMENTARIOS:
 -----------------------------------------------------------------
 */
 func (self *SimulationEngine) esperar_agentes() {
-	fmt.Println("Aun sin agentes")
+	fmt.Println("Esperando agentes...")
+	for len(self.il_mislefs.Il_eventos) == 0 {
+	}
 }
 
 /*
@@ -187,8 +218,12 @@ COMENTARIOS:
 -----------------------------------------------------------------
 */
 func (self *SimulationEngine) Simular(ai_cicloinicial, ai_nciclos TypeClock) {
-	ld_ini := time.Now()
 
+	//Iniciamos escucha de mensajes
+	go self.listen_subnets()
+	time.Sleep(time.Duration(10) * time.Second)
+	
+	ld_ini := time.Now()
 	// Inicializamos el reloj local
 	// ------------------------------------------------------------------
 	self.ii_relojlocal = ai_cicloinicial
@@ -196,31 +231,10 @@ func (self *SimulationEngine) Simular(ai_cicloinicial, ai_nciclos TypeClock) {
 	// Inicializamos las transiciones sensibilizadas, es decir, ver si con el
 	// marcado inicial tenemos transiciones sensibilizadas
 	// ------------------------------------------------------------------
-	//self.il_mislefs.actualiza_sensibilizadas(self.ii_relojlocal)
+	self.il_mislefs.actualiza_sensibilizadas(self.ii_relojlocal)
 
 	for self.ii_relojlocal <= ai_nciclos {
-
-				// Los nuevos eventos han podido sensibilizar nuevas transiciones
-		// ------------------------------------------------------------------
-		self.il_mislefs.actualiza_sensibilizadas(self.ii_relojlocal)
-
-		// Tras tratar todos los eventos, si no nos quedan transiciones
-		// sensibilizadas no podemos simular nada mas, luego esperamos a
-		// los agentes y si no nos generan nuevos eventos procedemos a avanzar
-		// el reloj local
-		// ------------------------------------------------------------------
-		if !self.il_mislefs.hay_sensibilizadas() {
-			// self.esperar_agentes()
-			if !self.il_mislefs.hay_eventos(self.ii_relojlocal) {
-				self.ii_relojlocal = self.avanzar_tiempo()
-
-				if self.ii_relojlocal == -1 {
-					self.ii_relojlocal = ai_nciclos + 1
-				}
-			}
-		}
-
-		self.il_mislefs.Imprime() //DEPURACION
+		// self.il_mislefs.Imprime() //DEPURACION
 		fmt.Println("RELOJ LOCAL !!!  = ", self.ii_relojlocal)
 
 		// Si existen transiciones sensibilizadas para reloj local las disparamos
@@ -237,7 +251,25 @@ func (self *SimulationEngine) Simular(ai_cicloinicial, ai_nciclos TypeClock) {
 			self.tratar_eventos(self.ii_relojlocal)
 		}
 
+		// Los nuevos eventos han podido sensibilizar nuevas transiciones
+		// ------------------------------------------------------------------
+		self.il_mislefs.actualiza_sensibilizadas(self.ii_relojlocal)
 
+		// Tras tratar todos los eventos, si no nos quedan transiciones
+		// sensibilizadas no podemos simular nada mas, luego esperamos a
+		// los agentes y si no nos generan nuevos eventos procedemos a avanzar
+		// el reloj local
+		// ------------------------------------------------------------------
+		if !self.il_mislefs.hay_sensibilizadas() {
+			self.esperar_agentes()
+			if !self.il_mislefs.hay_eventos(self.ii_relojlocal) {
+				self.ii_relojlocal = self.avanzar_tiempo()
+
+				if self.ii_relojlocal == -1 {
+					self.ii_relojlocal = ai_nciclos + 1
+				}
+			}
+		}
 	}
 
 	elapsedTime := time.Since(ld_ini)
@@ -245,11 +277,65 @@ func (self *SimulationEngine) Simular(ai_cicloinicial, ai_nciclos TypeClock) {
 	// Devolver los resultados de la simulacion
 	self.devolver_resultados()
 	result := "\n---------------------"
-	result += "NUMERO DE TRANSICIONES DISPARADAS " +
+	result += "\nNUMERO DE TRANSICIONES DISPARADAS " +
 		fmt.Sprintf("%d", len(self.iv_results)) + "\n"
 	result += "TIEMPO SIMULADO en ciclos: " +
 		fmt.Sprintf("%d", ai_nciclos-ai_cicloinicial) + "\n"
 	result += "COSTE REAL SIMULACION: " +
 		fmt.Sprintf("%v", elapsedTime.String()) + "\n"
 	fmt.Println(result)
+}
+
+
+func (self *SimulationEngine) listen_subnets() {
+	
+	//  Preparing to receive conncection
+	ln, err := net.Listen("tcp", ":" + self.se_port)
+
+	if err != nil {
+		fmt.Println("Listening on port error: ", err.Error())
+	} else {
+		fmt.Println("***************** Listening on addr: ", self.se_addr," *****************")
+	}
+
+	for {
+		
+		// Accept incoming connection
+		conn, err := ln.Accept()
+		fmt.Printf("\nAccepted connection from: [%v]  ---->  on: %v\n", conn.RemoteAddr().String(), self.se_addr)
+
+		if err != nil {
+			fmt.Println("Error accepting connection:", err.Error())
+		}
+		
+		// Decode data
+		var msg MsgI
+		decoder := gob.NewDecoder(conn)
+		err = decoder.Decode(&msg)
+
+		if err != nil {
+			fmt.Printf("Error decoding message from: [%s]\n", conn.RemoteAddr().String())
+			fmt.Println(err.Error())
+		} else {			
+			switch val := msg.(type) {
+				case *MsgEvent:
+					idGlobal := val.Value.Ii_transicion
+					for _, t := range(self.il_mislefs.Subnet) {
+						if t.IdGlobal == idGlobal {
+							val.Value.Ii_transicion = t.IdLocal
+						}
+					}
+					fmt.Printf("\nMensaje de evento agregado a la cola: **%v**\n", val)
+					self.il_mislefs.agnade_evento(val.Value)
+				case *MsgLookAhead:
+					fmt.Printf("\nLookAhead Message received: **%v**\n", val)
+				default:
+					fmt.Printf("I don't know about type %T!\n", val)
+			}
+		}
+
+		// Shut down the connection.
+		conn.Close()
+
+	}
 }

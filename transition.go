@@ -33,8 +33,11 @@ type TransitionConstant struct {
 // Tipo abstracto Transition para guardar la informacion de una transicion
 // -----------------------------------------------------------------------
 type Transition struct {
-	// indice en la tabla global de transiciones
+	// indice en la tabla local de transiciones
 	IdLocal IndLocalTrans
+
+	// indice en la tabla global de transiciones
+	IdGlobal IndLocalTrans
 
 	// iiValorLef es el valor que tiene la funcion de
 	// sensibilizacion en el instante de tiempo que nos da
@@ -49,6 +52,9 @@ type Transition struct {
 	// cuando se dispare esta transicion, junto con la cte que
 	// tengo que propagar
 	Ii_listactes []TransitionConstant
+
+	// direccion de red asociada a la transicion remota
+	Ii_addr string 
 }
 
 /*

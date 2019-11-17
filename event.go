@@ -14,6 +14,8 @@ type Event struct {
 	Ii_transicion IndLocalTrans
 	// Constante que mandamos
 	Ii_cte TypeConst
+	// Si el evento debe ejecutarse remotamente o no
+	// Ii_remote bool 
 }
 
 /*

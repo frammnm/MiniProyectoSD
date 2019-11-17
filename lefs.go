@@ -21,7 +21,9 @@ type Lefs struct {
 	// Identificadores de las transiciones sensibilizadas para
 	// T = Reloj local actual. Slice que funciona como Stack
 	IsTransSensib StackTransitions
-	Il_eventos    EventList //Lista de eventos a procesar
+	Il_eventos    EventList // Lista de eventos a procesar
+	Il_pos			  map[IndLocalTrans]string // Mapa de transiciones globales y sus direcciones ip 
+	Il_pre				map[IndLocalTrans]string // Mapa de transiciones globales y sus direcciones ip
 }
 
 /*
@@ -169,6 +171,7 @@ COMENTARIOS: Me recorro todo el array de transiciones, por lo que deberiamos
 func (self *Lefs) actualiza_sensibilizadas(ai_relojlocal TypeClock) bool {
 	for li_i, t := range (*self).Subnet {
 		if t.IiValorLef <= 0 && t.Ii_tiempo == ai_relojlocal {
+			// fmt.Println("sensibilizada: ", li_i, "tiempo:", ai_relojlocal)
 			(*self).IsTransSensib.push(IndLocalTrans(li_i))
 		}
 	}
