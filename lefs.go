@@ -24,6 +24,7 @@ type Lefs struct {
 	Il_eventos    EventList // Lista de eventos a procesar
 	Il_pos			  map[IndLocalTrans]string // Mapa de transiciones globales y sus direcciones ip 
 	Il_pre				map[IndLocalTrans]string // Mapa de transiciones globales y sus direcciones ip
+	Il_lookOuts   map[string]TypeClock // Mapa donde guardo un valor de lookout por cada subred externa
 }
 
 /*

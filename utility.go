@@ -23,7 +23,13 @@ type MsgEvent struct {
 }
 
 type MsgLookAhead struct {
-	Value int64
+	Value TypeClock
+	From string
+}
+
+type MsgNull struct {
+	Value IndLocalTrans
+	From string
 }
 
 // func (m Msg) GetClock() v.VClock { return m.Clock }
@@ -41,6 +47,7 @@ type MsgLookAhead struct {
 func init() {
 	gob.Register(&MsgEvent{})
 	gob.Register(&MsgLookAhead{})
+	gob.Register(&MsgNull{})
 }
 
 
@@ -100,4 +107,11 @@ func TrueMap(m map[string]bool) bool {
 	  }
 	}
 	return true
+}
+
+func min(a, b TypeClock) TypeClock {
+    if a < b {
+        return a
+    }
+    return b
 }

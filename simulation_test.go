@@ -87,6 +87,7 @@ func TestSimulationEnginePartition1(t *testing.T) {
 			2: defaultAddresses[1],
 			4: defaultAddresses[2],
 		},
+		Il_lookOuts: make(map[string]TypeClock), 
 	}
 	ms := MakeMotorSimulation(lfs)
 	ms.se_addr = defaultAddresses[0]
@@ -127,6 +128,7 @@ func TestSimulationEnginePartition2(t *testing.T) {
 		Il_pre: map[IndLocalTrans]string{
 			0: defaultAddresses[0],
 		},
+		Il_lookOuts: make(map[string]TypeClock),
 	}
 	ms := MakeMotorSimulation(lfs)
 	ms.se_addr = defaultAddresses[1]
@@ -166,6 +168,7 @@ func TestSimulationEnginePartition3(t *testing.T) {
 		Il_pre: map[IndLocalTrans]string{
 			0: defaultAddresses[0],
 		},
+		Il_lookOuts: make(map[string]TypeClock),
 	}
 	ms := MakeMotorSimulation(lfs)
 	ms.se_addr = defaultAddresses[2]

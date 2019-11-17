@@ -17,7 +17,7 @@ import (
 	"time"
 	"net"
 	"encoding/gob"
-
+	// "sync"
 )
 
 // TypeClock defines integer size for holding time.
@@ -31,11 +31,12 @@ type ResultadoTransition struct {
 
 // SimulationEngine is the basic data type for simulation execution
 type SimulationEngine struct {
-	il_mislefs    Lefs                  // Estructura de datos del simulador
-	ii_relojlocal TypeClock             // Valor de mi reloj local
-	iv_results    []ResultadoTransition // slice dinamico con los resultados
-	se_addr 			string 								// Direccion de escucha de mensajes
-	se_port 			string 								// Puerto de escucha de mensajes
+	il_mislefs    	Lefs                  // Estructura de datos del simulador
+	ii_relojlocal 	TypeClock             // Valor de mi reloj local
+	iv_results    	[]ResultadoTransition // slice dinamico con los resultados
+	se_addr 				string 								// Direccion de escucha de mensajes
+	se_port 				string 								// Puerto de escucha de mensaje
+	se_lookout_done bool
 }
 
 /*
@@ -152,9 +153,31 @@ COMENTARIOS:
 -----------------------------------------------------------------
 */
 func (self *SimulationEngine) esperar_agentes() {
-	fmt.Println("Esperando agentes...")
-	for len(self.il_mislefs.Il_eventos) == 0 {
+	// for len(self.il_mislefs.Il_eventos) == 0 {
+	// }
+	fmt.Println("Enviando agentes en busqueda de LookAheads..")
+	// Buscar direccion de las subredes
+	addrs := self.il_mislefs.Il_pre
+	self.se_lookout_done = false
+	for idGlobal, addr := range(addrs) {
+		var msg MsgI
+		msg = MsgNull{idGlobal, self.se_addr}
+		//Inicializo el mapa de lookouts para esa direccion
+		self.il_mislefs.Il_lookOuts[addr] = -1
+		self.send_message(msg, addr)
 	}
+	
+	self.esperar_lookaheads()
+	return
+}
+
+func (self *SimulationEngine) esperar_lookaheads() {
+
+	for !self.se_lookout_done {	
+	}
+
+	fmt.Println("Recibidos todos los lookAhead")
+	return
 }
 
 /*
@@ -170,9 +193,30 @@ COMENTARIOS:
 -----------------------------------------------------------------
 */
 func (self *SimulationEngine) avanzar_tiempo() TypeClock {
+
 	nextTime := self.il_mislefs.tiempo_primer_evento()
-	fmt.Println("NEXT CLOCK...... : ", nextTime)
-	return nextTime
+
+	// Operar tiempo basado en self.il_mislefs.Il_lookOuts vs self.il_mislefs.tiempo_primer_evento()
+	var currentLookAhead TypeClock
+	var nextLookAhead TypeClock
+	//Valores de max int 32
+	currentLookAhead = 2147483647
+	nextLookAhead = 2147483647
+	for _, addr := range (self.il_mislefs.Il_pre) {
+		nextLookAhead = self.il_mislefs.Il_lookOuts[addr]
+		currentLookAhead = min(currentLookAhead, nextLookAhead)
+	}
+
+	//Reinicializo el mapa de lookouts despues de calcular
+	self.il_mislefs.Il_lookOuts = make(map[string]TypeClock)
+
+	if nextTime <= currentLookAhead && nextTime != -1 {
+		fmt.Println("NEXT CLOCK...... : ", nextTime)
+		return nextTime
+	} else {
+		fmt.Println("NEXT CLOCK...... : ", currentLookAhead)
+		return currentLookAhead
+	}
 }
 
 /*
@@ -293,19 +337,19 @@ func (self *SimulationEngine) listen_subnets() {
 	ln, err := net.Listen("tcp", ":" + self.se_port)
 
 	if err != nil {
-		fmt.Println("Listening on port error: ", err.Error())
+		fmt.Println("Error al escuchar en el puerto: ", err.Error())
 	} else {
-		fmt.Println("***************** Listening on addr: ", self.se_addr," *****************")
+		fmt.Println("***************** Escuchando en la direccion: ", self.se_addr," *****************")
 	}
 
 	for {
 		
 		// Accept incoming connection
 		conn, err := ln.Accept()
-		fmt.Printf("\nAccepted connection from: [%v]  ---->  on: %v\n", conn.RemoteAddr().String(), self.se_addr)
+		fmt.Printf("\nConexion aceptada desde: [%v]  ---->  en: %v\n", conn.RemoteAddr().String(), self.se_addr)
 
 		if err != nil {
-			fmt.Println("Error accepting connection:", err.Error())
+			fmt.Println("Error aceptando conexion:", err.Error())
 		}
 		
 		// Decode data
@@ -314,7 +358,7 @@ func (self *SimulationEngine) listen_subnets() {
 		err = decoder.Decode(&msg)
 
 		if err != nil {
-			fmt.Printf("Error decoding message from: [%s]\n", conn.RemoteAddr().String())
+			fmt.Printf("Error decodificando mensaje desde: [%s]\n", conn.RemoteAddr().String())
 			fmt.Println(err.Error())
 		} else {			
 			switch val := msg.(type) {
@@ -328,9 +372,29 @@ func (self *SimulationEngine) listen_subnets() {
 					fmt.Printf("\nMensaje de evento agregado a la cola: **%v**\n", val)
 					self.il_mislefs.agnade_evento(val.Value)
 				case *MsgLookAhead:
-					fmt.Printf("\nLookAhead Message received: **%v**\n", val)
+					fmt.Printf("\nMensaje LookAhead recibido y agregado al mapa: **%v**\n", val)
+					self.il_mislefs.Il_lookOuts[val.From] = val.Value
+					
+					done := true
+					for _, lookahead := range(self.il_mislefs.Il_lookOuts) {
+						if lookahead < 0 {
+							done = false 
+						}
+					}
+
+					if done {
+						self.se_lookout_done = true
+					}
+				case *MsgNull:
+					fmt.Printf("\nMensaje Null recibido: **%v**\n", val)
+					//Enviar LookAhead
+					value := self.calculate_la(val.Value)
+					var msg MsgI
+					msg = MsgLookAhead{value, self.se_addr}
+					self.send_message(msg, val.From)
+					fmt.Printf("\nMensaje LookAhead enviado: %v\n", msg)
 				default:
-					fmt.Printf("I don't know about type %T!\n", val)
+					fmt.Printf("No se que tipo es %T!\n", val)
 			}
 		}
 
@@ -338,4 +402,15 @@ func (self *SimulationEngine) listen_subnets() {
 		conn.Close()
 
 	}
+}
+
+func (self *SimulationEngine) calculate_la(idGlobal IndLocalTrans) TypeClock {
+	var durTime TypeClock  
+	for _, t := range(self.il_mislefs.Subnet) {
+		if t.IdGlobal == idGlobal {
+			durTime = t.Ii_duracion_disparo
+			break
+		}
+	}
+	return self.ii_relojlocal + durTime
 }
