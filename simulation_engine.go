@@ -17,7 +17,6 @@ import (
 	"time"
 	"net"
 	"encoding/gob"
-	// "sync"
 )
 
 // TypeClock defines integer size for holding time.
@@ -153,8 +152,6 @@ COMENTARIOS:
 -----------------------------------------------------------------
 */
 func (self *SimulationEngine) esperar_agentes() {
-	// for len(self.il_mislefs.Il_eventos) == 0 {
-	// }
 	fmt.Println("Enviando agentes en busqueda de LookAheads..")
 	// Buscar direccion de las subredes
 	addrs := self.il_mislefs.Il_pre
@@ -166,15 +163,15 @@ func (self *SimulationEngine) esperar_agentes() {
 		self.il_mislefs.Il_lookOuts[addr] = -1
 		self.send_message(msg, addr)
 	}
-	
 	self.esperar_lookaheads()
 	return
 }
 
 func (self *SimulationEngine) esperar_lookaheads() {
 
-	for !self.se_lookout_done {	
-	}
+	time.Sleep(1000 * time.Millisecond)
+
+	for !self.se_lookout_done {}
 
 	fmt.Println("Recibidos todos los lookAhead")
 	return

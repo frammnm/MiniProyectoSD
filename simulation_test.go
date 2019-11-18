@@ -93,7 +93,7 @@ func TestSimulationEnginePartition1(t *testing.T) {
 	ms.se_addr = defaultAddresses[0]
 	ms.se_port = defaultPorts[0]
 	ms.Simular(0, simulationTime) // ciclo 0 hasta ciclo 3
-	for{}
+	
 }
 
 
@@ -134,7 +134,7 @@ func TestSimulationEnginePartition2(t *testing.T) {
 	ms.se_addr = defaultAddresses[1]
 	ms.se_port = defaultPorts[1]
 	ms.Simular(0, simulationTime) // ciclo 0 hasta ciclo 3
-	for{}
+	
 }
 
 func TestSimulationEnginePartition3(t *testing.T) {
@@ -174,7 +174,7 @@ func TestSimulationEnginePartition3(t *testing.T) {
 	ms.se_addr = defaultAddresses[2]
 	ms.se_port = defaultPorts[2]
 	ms.Simular(0, simulationTime) // ciclo 0 hasta ciclo 3
-	for{}
+	
 }
 
 func TestSimulationDistrEngine(t *testing.T) {
