@@ -10,8 +10,8 @@ import (
 
 
 // var defaultAddresses = []string{"155.210.154.200:17431", "155.210.154.199:17432", "155.210.154.197:17433"}
-var defaultAddresses = []string{"192.168.1.70:17431", "192.168.1.70:17432", "192.168.1.70:17433"}
-var defaultPorts = []string{"17431", "17432", "17433"}
+var defaultAddresses = []string{"192.168.1.70:17431", "192.168.1.70:17432", "192.168.1.70:17433", "192.168.1.70:17434", "192.168.1.70:17435"}
+var defaultPorts = []string{"17431", "17432", "17433", "17434", "17435"}
 var simulationTime = TypeClock(6)
 
 
@@ -66,15 +66,18 @@ func TestSimulationEnginePartition1(t *testing.T) {
 					TransitionConstant{0, 1},
 					TransitionConstant{-1, -1},
 					TransitionConstant{-3, -1},
+					TransitionConstant{-5, -1},
+					TransitionConstant{-7, -1},
+
 				},
 			},
 			Transition{
 				IdLocal:             1,
-				IdGlobal:						 5,
-				IiValorLef:          2,
+				IdGlobal:						 9,
+				IiValorLef:          4,
 				Ii_duracion_disparo: 1,
 				Ii_listactes: []TransitionConstant{
-					TransitionConstant{1, 2},
+					TransitionConstant{1, 4},
 					TransitionConstant{0, -1},
 				},
 			},
@@ -82,10 +85,14 @@ func TestSimulationEnginePartition1(t *testing.T) {
 		Il_pos: map[IndLocalTrans]string{
 			1: defaultAddresses[1],
 			3: defaultAddresses[2],
+			5: defaultAddresses[3],
+			7: defaultAddresses[4],
 		},
 		Il_pre: map[IndLocalTrans]string{
 			2: defaultAddresses[1],
 			4: defaultAddresses[2],
+			6: defaultAddresses[3],
+			8: defaultAddresses[4],
 		},
 		Il_lookOuts: make(map[string]TypeClock), 
 	}
@@ -118,12 +125,12 @@ func TestSimulationEnginePartition2(t *testing.T) {
 				Ii_duracion_disparo: 1,
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
-					TransitionConstant{-5, -1},
+					TransitionConstant{-9, -1},
 				},
 			},
 		},
 		Il_pos: map[IndLocalTrans]string{
-			5: defaultAddresses[0],
+			9: defaultAddresses[0],
 		},
 		Il_pre: map[IndLocalTrans]string{
 			0: defaultAddresses[0],
@@ -158,12 +165,12 @@ func TestSimulationEnginePartition3(t *testing.T) {
 				Ii_duracion_disparo: 1,
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
-					TransitionConstant{-5, -1},
+					TransitionConstant{-9, -1},
 				},
 			},
 		},
 		Il_pos: map[IndLocalTrans]string{
-			5: defaultAddresses[0],
+			9: defaultAddresses[0],
 		},
 		Il_pre: map[IndLocalTrans]string{
 			0: defaultAddresses[0],
@@ -173,6 +180,86 @@ func TestSimulationEnginePartition3(t *testing.T) {
 	ms := MakeMotorSimulation(lfs)
 	ms.se_addr = defaultAddresses[2]
 	ms.se_port = defaultPorts[2]
+	ms.Simular(0, simulationTime) // ciclo 0 hasta ciclo 3
+	
+}
+
+func TestSimulationEnginePartition4(t *testing.T) {
+	//t.Skip("skipping test simulation.")
+	lfs := Lefs{ //Ejemplo PN documento adjunto
+		Subnet: TransitionList{
+			Transition{
+				IdLocal:             0,
+				IdGlobal:						 5,
+				IiValorLef:          1,
+				Ii_duracion_disparo: 1,
+				Ii_listactes: []TransitionConstant{
+					TransitionConstant{0, 1},
+					TransitionConstant{1, -1},
+				},
+			},
+			Transition{
+				IdLocal:             1,
+				IdGlobal:						 6,
+				IiValorLef:          1,
+				Ii_duracion_disparo: 1,
+				Ii_listactes: []TransitionConstant{
+					TransitionConstant{1, 1},
+					TransitionConstant{-9, -1},
+				},
+			},
+		},
+		Il_pos: map[IndLocalTrans]string{
+			9: defaultAddresses[0],
+		},
+		Il_pre: map[IndLocalTrans]string{
+			0: defaultAddresses[0],
+		},
+		Il_lookOuts: make(map[string]TypeClock),
+	}
+	ms := MakeMotorSimulation(lfs)
+	ms.se_addr = defaultAddresses[3]
+	ms.se_port = defaultPorts[3]
+	ms.Simular(0, simulationTime) // ciclo 0 hasta ciclo 3
+	
+}
+
+func TestSimulationEnginePartition5(t *testing.T) {
+	//t.Skip("skipping test simulation.")
+	lfs := Lefs{ //Ejemplo PN documento adjunto
+		Subnet: TransitionList{
+			Transition{
+				IdLocal:             0,
+				IdGlobal:						 7,
+				IiValorLef:          1,
+				Ii_duracion_disparo: 1,
+				Ii_listactes: []TransitionConstant{
+					TransitionConstant{0, 1},
+					TransitionConstant{1, -1},
+				},
+			},
+			Transition{
+				IdLocal:             1,
+				IdGlobal:						 8,
+				IiValorLef:          1,
+				Ii_duracion_disparo: 1,
+				Ii_listactes: []TransitionConstant{
+					TransitionConstant{1, 1},
+					TransitionConstant{-9, -1},
+				},
+			},
+		},
+		Il_pos: map[IndLocalTrans]string{
+			9: defaultAddresses[0],
+		},
+		Il_pre: map[IndLocalTrans]string{
+			0: defaultAddresses[0],
+		},
+		Il_lookOuts: make(map[string]TypeClock),
+	}
+	ms := MakeMotorSimulation(lfs)
+	ms.se_addr = defaultAddresses[4]
+	ms.se_port = defaultPorts[4]
 	ms.Simular(0, simulationTime) // ciclo 0 hasta ciclo 3
 	
 }
