@@ -35,7 +35,7 @@ type SimulationEngine struct {
 	iv_results    	[]ResultadoTransition // slice dinamico con los resultados
 	se_addr 				string 								// Direccion de escucha de mensajes
 	se_port 				string 								// Puerto de escucha de mensaje
-	se_lookout_done bool
+	se_lookout_done bool 									// Booleano para indicar que llegaron todos los mensajes LookAhead
 }
 
 /*
@@ -161,7 +161,7 @@ func (self *SimulationEngine) esperar_agentes() {
 		msg = MsgNull{idGlobal, self.se_addr}
 		//Inicializo el mapa de lookouts para esa direccion
 		self.il_mislefs.Il_lookOuts[addr] = -1
-		self.send_message(msg, addr)
+		go self.send_message(msg, addr)
 	}
 	self.esperar_lookaheads()
 	return
@@ -203,6 +203,8 @@ func (self *SimulationEngine) avanzar_tiempo() TypeClock {
 		nextLookAhead = self.il_mislefs.Il_lookOuts[addr]
 		currentLookAhead = min(currentLookAhead, nextLookAhead)
 	}
+
+	// fmt.Printf("\nSE OPERO EL TIEMPO CON NEXTTIME:%v   currentLookAhead:%v  lookouts: %v \n\n\n", nextTime, currentLookAhead, self.il_mislefs.Il_lookOuts)
 
 	//Reinicializo el mapa de lookouts despues de calcular
 	self.il_mislefs.Il_lookOuts = make(map[string]TypeClock)
@@ -343,7 +345,7 @@ func (self *SimulationEngine) listen_subnets() {
 		
 		// Accept incoming connection
 		conn, err := ln.Accept()
-		fmt.Printf("\nConexion aceptada desde: [%v]  ---->  en: %v\n", conn.RemoteAddr().String(), self.se_addr)
+		// fmt.Printf("\nConexion aceptada desde: [%v]  ---->  en: %v\n", conn.RemoteAddr().String(), self.se_addr)
 
 		if err != nil {
 			fmt.Println("Error aceptando conexion:", err.Error())
@@ -369,7 +371,7 @@ func (self *SimulationEngine) listen_subnets() {
 					fmt.Printf("\nMensaje de evento agregado a la cola: **%v**\n", val)
 					self.il_mislefs.agnade_evento(val.Value)
 				case *MsgLookAhead:
-					fmt.Printf("\nMensaje LookAhead recibido y agregado al mapa: **%v**\n", val)
+					// fmt.Printf("\nMensaje LookAhead recibido y agregado al mapa: **%v**\n", val)
 					self.il_mislefs.Il_lookOuts[val.From] = val.Value
 					
 					done := true
@@ -380,6 +382,7 @@ func (self *SimulationEngine) listen_subnets() {
 					}
 
 					if done {
+						// fmt.Println("DICCIONARIO DE MIS LOOKAHEADS COMPLETOS: ", self.il_mislefs.Il_lookOuts)
 						self.se_lookout_done = true
 					}
 				case *MsgNull:
@@ -389,7 +392,7 @@ func (self *SimulationEngine) listen_subnets() {
 					var msg MsgI
 					msg = MsgLookAhead{value, self.se_addr}
 					self.send_message(msg, val.From)
-					fmt.Printf("\nMensaje LookAhead enviado: %v\n", msg)
+					// fmt.Printf("\nMensaje LookAhead enviado: %v\n", msg)
 				default:
 					fmt.Printf("No se que tipo es %T!\n", val)
 			}

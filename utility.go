@@ -32,18 +32,6 @@ type MsgNull struct {
 	From string
 }
 
-// func (m Msg) GetClock() v.VClock { return m.Clock }
-// func (m Msg) SetFrom(s string)   { m.From = s }
-// func (m Msg) GetFrom() string  { return m.From }
-
-// func (m Ack) GetClock() v.VClock { return m.Clock }
-// func (m Ack) SetFrom(s string)   { m.From = s }
-// func (m Ack) GetFrom() string  { return m.From }
-
-// func (m Marker) GetClock() v.VClock { return m.Clock }
-// func (m Marker) SetFrom(s string)   { m.From = s }
-// func (m Marker) GetFrom() string  { return m.From }
-
 func init() {
 	gob.Register(&MsgEvent{})
 	gob.Register(&MsgLookAhead{})
