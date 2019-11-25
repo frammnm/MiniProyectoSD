@@ -356,8 +356,8 @@ func TestSimulationDistrEngineX(t *testing.T) {
 	i := 0
 	for i < len(defaultAddresses) {
 	 config := &ssh.ClientConfig {
-	  // User: "a794893",
-	  User: "francisco",
+	  User: "a794893",
+	  // User: "francisco",
 	  Auth: []ssh.AuthMethod{PublicKey(rsa)}, HostKeyCallback: ssh.InsecureIgnoreHostKey()}
 
 	 conn, err := ssh.Dial("tcp", strings.Split(defaultAddresses[i], ":")[0] + ":22", config)
@@ -367,10 +367,10 @@ func TestSimulationDistrEngineX(t *testing.T) {
 
 	 // Start Snode
 	 fmt.Println("ssh to:", defaultAddresses[i], len(defaultAddresses), i)
-	 go RunCommand("cd " + dir + " && go test -run " + subnets[i], conn)
-	 fmt.Println("cd " + dir + " && go test -run " + subnets[i])
-	 // go RunCommand("cd " + dir + " && /usr/local/go/bin/go test -run " + subnets[i], conn)
-	 // fmt.Println("cd " + dir + " && /usr/local/go/bin/go test -run " + subnets[i])
+	 // go RunCommand("cd " + dir + " && go test -run " + subnets[i], conn)
+	 // fmt.Println("cd " + dir + " && go test -run " + subnets[i])
+	 go RunCommand("cd " + dir + " && /usr/local/go/bin/go test -run " + subnets[i], conn)
+	 fmt.Println("cd " + dir + " && /usr/local/go/bin/go test -run " + subnets[i])
 	 i++ 
 	 fmt.Println("nmero", i)
 	}
