@@ -360,6 +360,7 @@ func TestSimulationDistrEngineX(t *testing.T) {
 	  // User: "francisco",
 	  Auth: []ssh.AuthMethod{PublicKey(rsa)}, HostKeyCallback: ssh.InsecureIgnoreHostKey()}
 
+	 fmt.Println("Ssh command: ", strings.Split(defaultAddresses[i], ":")[0] + ":22", config)
 	 conn, err := ssh.Dial("tcp", strings.Split(defaultAddresses[i], ":")[0] + ":22", config)
 	 if err != nil {
 	 	panic(err)
