@@ -9,10 +9,10 @@ import (
 )
 
 
-// var defaultAddresses = []string{"155.210.154.200:17431", "155.210.154.199:17432", "155.210.154.197:17433"}
+var defaultAddresses = []string{"155.210.154.195:17431", "155.210.154.196:17432", "155.210.154.197:17433", "155.210.154.199:17434", "155.210.154.200:17435"}
 // var defaultAddresses = []string{"192.168.1.70:17431", "192.168.1.70:17432", "192.168.1.70:17433", "192.168.1.70:17434", "192.168.1.70:17435"}
 // var defaultAddresses = []string{"10.1.24.55:17431", "10.1.24.55:17432", "10.1.24.55:17433", "10.1.24.55:17434", "10.1.24.55:17435"}
-var defaultAddresses = []string{"127.0.0.1:17431", "127.0.0.1:17432", "127.0.0.1:17433", "127.0.0.1:17434", "127.0.0.1:17435"}
+// var defaultAddresses = []string{"127.0.0.1:17431", "127.0.0.1:17432", "127.0.0.1:17433", "127.0.0.1:17434", "127.0.0.1:17435"}
 var defaultPorts = []string{"17431", "17432", "17433", "17434", "17435"}
 var simulationTime = TypeClock(12)
 
@@ -348,10 +348,10 @@ func TestSimulationEnginePartition5(t *testing.T) {
 
 func TestSimulationDistrEngineX(t *testing.T) {
 	subnets := []string{"TestSimulationEnginePartition1", "TestSimulationEnginePartition2", "TestSimulationEnginePartition3", "TestSimulationEnginePartition4", "TestSimulationEnginePartition5"}
-	dir := "/home/francisco/go/src/MiniProyectoSD"
-	// dir := "/home/a794893/go/src/MiniProyectoSD"
-	rsa := "/home/francisco/.ssh/id_rsa"
-	// rsa := "/home/a794893/.ssh/id_rsa"
+	// dir := "/home/francisco/go/src/MiniProyectoSD"
+	dir := "/home/a794893/go/src/MiniProyectoSD"
+	// rsa := "/home/francisco/.ssh/id_rsa"
+	rsa := "/home/a794893/.ssh/id_rsa"
 
 	i := 0
 	for i < len(defaultAddresses) {
