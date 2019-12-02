@@ -9,7 +9,7 @@ import (
 )
 
 
-var defaultAddresses = []string{"155.210.154.195:17431", "155.210.154.196:17432", "155.210.154.197:17433", "155.210.154.199:17434", "155.210.154.200:17435"}
+var defaultAddresses = []string{"155.210.154.197:17431", "155.210.154.199:17432", "155.210.154.200:17433", "155.210.154.204:17434", "155.210.154.197:17435"}
 // var defaultAddresses = []string{"192.168.1.70:17431", "192.168.1.70:17432", "192.168.1.70:17433", "192.168.1.70:17434", "192.168.1.70:17435"}
 // var defaultAddresses = []string{"10.1.24.55:17431", "10.1.24.55:17432", "10.1.24.55:17433", "10.1.24.55:17434", "10.1.24.55:17435"}
 // var defaultAddresses = []string{"127.0.0.1:17431", "127.0.0.1:17432", "127.0.0.1:17433", "127.0.0.1:17434", "127.0.0.1:17435"}
@@ -351,14 +351,15 @@ func TestSimulationDistrEngineX(t *testing.T) {
 	// dir := "/home/francisco/go/src/MiniProyectoSD"
 	dir := "/home/a794893/go/src/MiniProyectoSD"
 	// rsa := "/home/francisco/.ssh/id_rsa"
-	rsa := "/home/a794893/.ssh/id_rsa"
+	// rsa := "/home/a794893/.ssh/id_rsa"
 
 	i := 0
 	for i < len(defaultAddresses) {
 	 config := &ssh.ClientConfig {
 	  User: "a794893",
 	  // User: "francisco",
-	  Auth: []ssh.AuthMethod{PublicKey(rsa)}, HostKeyCallback: ssh.InsecureIgnoreHostKey()}
+	  Auth: []ssh.AuthMethod{ssh.Password("hetero64")}, HostKeyCallback: ssh.InsecureIgnoreHostKey()}
+	  // Auth: []ssh.AuthMethod{PublicKey(rsa)}, HostKeyCallback: ssh.InsecureIgnoreHostKey()}
 
 	 fmt.Println("Ssh command: ", strings.Split(defaultAddresses[i], ":")[0] + ":22", config)
 	 conn, err := ssh.Dial("tcp", strings.Split(defaultAddresses[i], ":")[0] + ":22", config)
