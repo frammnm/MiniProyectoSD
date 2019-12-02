@@ -6,6 +6,8 @@ import (
 	"golang.org/x/crypto/ssh"
 	"fmt"
 	"strings"
+	"math/rand"
+	"time"
 )
 
 
@@ -16,6 +18,17 @@ var defaultAddresses = []string{"127.0.0.1:17431", "127.0.0.1:17432", "127.0.0.1
 var defaultPorts = []string{"17431", "17432", "17433", "17434", "17435"}
 var simulationTime = TypeClock(12)
 
+var random = true
+
+func DuracionDisparo() TypeClock {
+	if random {
+		rand.Seed(time.Now().UnixNano())
+		return TypeClock(rand.Intn(3)+1)
+	} else {
+		return TypeClock(1)
+	}
+}
+
 
 func TestSimulationEngineBasic(t *testing.T) {
 	//t.Skip("skipping test simulation.")
@@ -24,7 +37,7 @@ func TestSimulationEngineBasic(t *testing.T) {
 			Transition{
 				IdLocal:             0,
 				IiValorLef:          0,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{0, 1},
 					TransitionConstant{1, -1},
@@ -34,7 +47,7 @@ func TestSimulationEngineBasic(t *testing.T) {
 			Transition{
 				IdLocal:             1,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
 					TransitionConstant{2, -1},
@@ -43,7 +56,7 @@ func TestSimulationEngineBasic(t *testing.T) {
 			Transition{
 				IdLocal:             2,
 				IiValorLef:          2,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{2, 2},
 					TransitionConstant{0, -1},
@@ -63,7 +76,7 @@ func TestSimulationEnginePartition1(t *testing.T) {
 				IdLocal:             0,
 				IdGlobal:						 0,
 				IiValorLef:          0,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{0, 1},
 					TransitionConstant{-1, -1},
@@ -77,7 +90,7 @@ func TestSimulationEnginePartition1(t *testing.T) {
 				IdLocal:             1,
 				IdGlobal:						 17,
 				IiValorLef:          4,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 4},
 					TransitionConstant{0, -1},
@@ -114,7 +127,7 @@ func TestSimulationEnginePartition2(t *testing.T) {
 				IdLocal:             0,
 				IdGlobal:						 1,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{0, 1},
 					TransitionConstant{1, -1},
@@ -124,7 +137,7 @@ func TestSimulationEnginePartition2(t *testing.T) {
 				IdLocal:             1,
 				IdGlobal:						 2,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
 					TransitionConstant{2, -1},
@@ -134,7 +147,7 @@ func TestSimulationEnginePartition2(t *testing.T) {
 				IdLocal:             2,
 				IdGlobal:						 3,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{2, 1},
 					TransitionConstant{3, -1},
@@ -144,7 +157,7 @@ func TestSimulationEnginePartition2(t *testing.T) {
 				IdLocal:             3,
 				IdGlobal:						 4,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{3, 1},
 					TransitionConstant{-17, -1},
@@ -174,7 +187,7 @@ func TestSimulationEnginePartition3(t *testing.T) {
 				IdLocal:             0,
 				IdGlobal:						 5,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{0, 1},
 					TransitionConstant{1, -1},
@@ -184,7 +197,7 @@ func TestSimulationEnginePartition3(t *testing.T) {
 				IdLocal:             1,
 				IdGlobal:						 6,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
 					TransitionConstant{2, -1},
@@ -194,7 +207,7 @@ func TestSimulationEnginePartition3(t *testing.T) {
 				IdLocal:             2,
 				IdGlobal:						 7,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{2, 1},
 					TransitionConstant{3, -1},
@@ -204,7 +217,7 @@ func TestSimulationEnginePartition3(t *testing.T) {
 				IdLocal:             3,
 				IdGlobal:						 8,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{3, 1},
 					TransitionConstant{-17, -1},
@@ -234,7 +247,7 @@ func TestSimulationEnginePartition4(t *testing.T) {
 				IdLocal:             0,
 				IdGlobal:						 9,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{0, 1},
 					TransitionConstant{1, -1},
@@ -244,7 +257,7 @@ func TestSimulationEnginePartition4(t *testing.T) {
 				IdLocal:             1,
 				IdGlobal:						 10,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
 					TransitionConstant{2, -1},
@@ -254,7 +267,7 @@ func TestSimulationEnginePartition4(t *testing.T) {
 				IdLocal:             2,
 				IdGlobal:						 11,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{2, 1},
 					TransitionConstant{3, -1},
@@ -264,7 +277,7 @@ func TestSimulationEnginePartition4(t *testing.T) {
 				IdLocal:             3,
 				IdGlobal:						 12,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{3, 1},
 					TransitionConstant{-17, -1},
@@ -294,7 +307,7 @@ func TestSimulationEnginePartition5(t *testing.T) {
 				IdLocal:             0,
 				IdGlobal:						 13,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{0, 1},
 					TransitionConstant{1, -1},
@@ -304,7 +317,7 @@ func TestSimulationEnginePartition5(t *testing.T) {
 				IdLocal:             1,
 				IdGlobal:						 14,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{1, 1},
 					TransitionConstant{2, -1},
@@ -314,7 +327,7 @@ func TestSimulationEnginePartition5(t *testing.T) {
 				IdLocal:             2,
 				IdGlobal:						 15,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{2, 1},
 					TransitionConstant{3, -1},
@@ -324,7 +337,7 @@ func TestSimulationEnginePartition5(t *testing.T) {
 				IdLocal:             3,
 				IdGlobal:						 16,
 				IiValorLef:          1,
-				Ii_duracion_disparo: 1,
+				Ii_duracion_disparo: DuracionDisparo(),
 				Ii_listactes: []TransitionConstant{
 					TransitionConstant{3, 1},
 					TransitionConstant{-17, -1},
